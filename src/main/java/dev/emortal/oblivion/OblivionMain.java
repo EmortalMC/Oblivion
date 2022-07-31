@@ -7,6 +7,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientSetRecipeBookStatePacket;
@@ -27,6 +28,10 @@ public class OblivionMain {
     private static Logger logger = LoggerFactory.getLogger("Oblivion");
 
     public static void main(String... args) {
+
+        System.setProperty("minestom.tps", "1");
+        System.getProperty("minestom.chunk-view-distance", "2");
+        System.getProperty("minestom.entity-view-distance", "0");
 
         final var properties = loadProperties();
         final var server = MinecraftServer.init();
@@ -71,21 +76,22 @@ public class OblivionMain {
         final String proxySecret = properties.getProperty("proxy-secret");
 
         switch (proxy) {
-            case "velocity":
+            case "velocity" -> {
                 VelocityProxy.enable(proxySecret);
-            case "bungee":
+                logger.info("Enabling velocity forwarding");
+            }
+            case "bungee" -> {
                 BungeeCordProxy.enable();
+                logger.info("Enabling bungee forwarding");
+            }
         }
 
 
         if (onlineMode) {
             logger.info("Starting server with online mode enabled!");
-            //MojangAuth.init();
+            MojangAuth.init();
         }
 
-        System.setProperty("minestom.tps", "1");
-        System.getProperty("minestom.chunk-view-distance", "2");
-        System.getProperty("minestom.entity-view-distance", "0");
         MinecraftServer.setCompressionThreshold(compressionThreshold);
 
         server.start(address, port);
