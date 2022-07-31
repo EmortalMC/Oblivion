@@ -17,6 +17,9 @@ tasks {
         archiveBaseName.set("Oblivion")
         mergeServiceFiles()
         minimize()
+        manifest {
+            attributes["Main-Class"] = "dev.emortal.oblivion.OblivionMain"
+        }
     }
 
     build { dependsOn(shadowJar) }

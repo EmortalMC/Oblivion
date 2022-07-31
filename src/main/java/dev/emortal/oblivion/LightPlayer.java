@@ -1,3 +1,5 @@
+package dev.emortal.oblivion;
+
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.player.PlayerConnection;

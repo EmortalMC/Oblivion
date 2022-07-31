@@ -1,3 +1,5 @@
+package dev.emortal.oblivion;
+
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
