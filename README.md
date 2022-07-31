@@ -4,7 +4,7 @@ A super lightweight Limbo server made with Minestom
 ## Config
 
 | Setting               | Note                                                                                    | Default |
-|:----------------------|-----------------------------------------------------------------------------------------|---------|
+|-----------------------|-----------------------------------------------------------------------------------------|---------|
 | address               | The address to bind to                                                                  | 0.0.0.0 |   
 | port                  | The port to bind to                                                                     | 25565   |
 | online-mode           | (currently broken on Minestom 1.19.1 - previous versions work fine)                     | true    |
