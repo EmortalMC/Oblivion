@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Minestom:Minestom:d6d1b85601")
+    implementation("com.github.Minestom:Minestom:ccd545f060")
 }
 
 tasks {
