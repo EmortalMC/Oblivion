@@ -11,8 +11,11 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.network.packet.client.play.ClientSetRecipeBookStatePacket;
+import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.CameraPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.DimensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +27,8 @@ import java.util.UUID;
 
 public class OblivionMain {
 
-    private static Path configPath = Path.of("./server.properties");
-    private static Logger logger = LoggerFactory.getLogger("Oblivion");
+    private static final Path configPath = Path.of("./server.properties");
+    private static final Logger logger = LoggerFactory.getLogger("Oblivion");
 
     public static void main(String... args) {
 
@@ -36,8 +39,25 @@ public class OblivionMain {
         final var properties = loadProperties();
         final var server = MinecraftServer.init();
 
-        final var instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+        final var dimension = DimensionType.builder(NamespaceID.from("minecraft:oblivion"))
+                .skylightEnabled(false)
+                .ceilingEnabled(false)
+                .fixedTime(null)
+                .effects(properties.getProperty("end-dimension").equals("true") ? "the_end" : "")
+                .ambientLight(1.0f)
+                .height(16)
+                .minY(0)
+                .logicalHeight(16)
+                .build();
+
+        MinecraftServer.getDimensionTypeManager().addDimension(dimension);
+
+        final var instance = new LightInstance(UUID.randomUUID(), dimension);
+        MinecraftServer.getInstanceManager().registerInstance(instance);
+        instance.setTimeRate(0);
+        instance.setTimeUpdate(null);
         instance.enableAutoChunkLoad(false);
+
         // Client requires a few chunks to load the world
         // also apparently requires a 3x3 area to allow for refreshAbilities()?
         for (int x = -1; x <= 1; x++) {
@@ -52,7 +72,7 @@ public class OblivionMain {
 
         final var globalEvent = MinecraftServer.getGlobalEventHandler();
 
-        // Use light players
+        // Use custom LightPlayer
         MinecraftServer.getConnectionManager().setPlayerProvider(LightPlayer::new);
         // Ignore warning when player opens recipe book
         MinecraftServer.getPacketListenerManager().setListener(ClientSetRecipeBookStatePacket.class, (a, b) -> {});
@@ -66,14 +86,13 @@ public class OblivionMain {
             e.getPlayer().sendPacket(cameraPacket);
         });
 
+        final var onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
+        final var address = properties.getProperty("address");
+        final var port = Integer.parseInt(properties.getProperty("port"));
+        final var compressionThreshold = Integer.parseInt(properties.getProperty("compression-threshold"));
 
-        final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
-        final String address = properties.getProperty("address");
-        final int port = Integer.parseInt(properties.getProperty("port"));
-        final int compressionThreshold = Integer.parseInt(properties.getProperty("compression-threshold"));
-
-        final String proxy = properties.getProperty("proxy").toLowerCase();
-        final String proxySecret = properties.getProperty("proxy-secret");
+        final var proxy = properties.getProperty("proxy").toLowerCase();
+        final var proxySecret = properties.getProperty("proxy-secret");
 
         switch (proxy) {
             case "velocity" -> {
@@ -95,7 +114,6 @@ public class OblivionMain {
         MinecraftServer.setCompressionThreshold(compressionThreshold);
 
         server.start(address, port);
-
     }
 
     public static Properties loadProperties() {

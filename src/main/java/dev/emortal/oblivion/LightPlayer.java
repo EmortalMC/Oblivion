@@ -11,8 +11,6 @@ public class LightPlayer extends Player {
     public LightPlayer(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
         super(uuid, username, playerConnection);
 
-
-
         setAutoViewable(false);
     }
 
